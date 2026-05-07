@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title: 'My Dashboard' }) %>
+<nav class="navbar">
+  <div class="nav-brand">🏠 SmartRental</div>
+  <div class="nav-links">
+    <span class="nav-user">👤 <%= user.name %></span>
+    <a href="/logout" class="btn-logout">Logout</a>
+  </div>
+</nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>Welcome, <%= user.name %> 👋</h2>
+    <span class="badge badge-tenant">Tenant</span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🏠</div>
+      <div class="stat-value"><%= tenant.room_no %></div>
+      <div class="stat-label">Your Room</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><%= tenant.is_active ? '✅' : '🚫' %></div>
+      <div class="stat-value"><%= tenant.is_active ? 'Active' : 'Blocked' %></div>
+      <div class="stat-label">Account Status</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📡</div>
+      <div class="stat-value"><%= tenant.rfid_code || 'None' %></div>
+      <div class="stat-label">RFID Tag</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value"><%= payments.length > 0 ? payments[0].status.toUpperCase() : 'NO DATA' %></div>
+      <div class="stat-label">Payment Status</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h3>💳 Payment History</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Valid Until</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% payments.forEach(p => { %>
+          <tr>
+            <td><%= new Date(p.created_at).toLocaleDateString() %></td>
+            <td>TZS <%= parseInt(p.amount).toLocaleString() %></td>
+            <td><span class="badge badge-info"><%= p.payment_method %></span></td>
+            <td><span class="badge <%= p.status === 'paid' ? 'badge-success' : 'badge-warning' %>"><%= p.status.toUpperCase() %></span></td>
+            <td><%= p.expiry_date ? new Date(p.expiry_date).toLocaleDateString() : '—' %></td>
+          </tr>
+        <% }) %>
+        <% if (!payments.length) { %>
+          <tr><td colspan="5" class="empty-state">No payment records found.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if (!tenant.is_active) { %>
+    <div class="alert alert-error" style="margin-top:1rem;">
+      ⚠️ Your account is blocked. Please contact the landlord to make a payment and restore access.
+    </div>
+  <% } %>
+</div>
+</body></html>

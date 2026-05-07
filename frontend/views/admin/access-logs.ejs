@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <%- include('../partials/sidebar', { user, activePage: 'logs' }) %>
+  <div class="main-content">
+    <%- include('../partials/topbar', { user, title: 'Historia ya Mlango' }) %>
+
+    <div class="content-area">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-history"></i> Rekodi za Ufikiaji wa Mlango (Hivi Karibuni 200)</h3>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Wakati</th><th>Mpangaji</th><th>Chumba</th><th>Kifaa</th><th>RFID</th><th>Hatua</th><th>Sababu</th></tr>
+            </thead>
+            <tbody>
+              <% logs.forEach((l, i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><%= new Date(l.timestamp).toLocaleString('sw-TZ') %></td>
+                <td><%= l.tenantId?.name || 'Haijulikani' %></td>
+                <td><%= l.tenantId?.roomNo || '-' %></td>
+                <td><%= l.deviceName || '-' %></td>
+                <td><code><%= l.rfidTag || '-' %></code></td>
+                <td>
+                  <% if (l.action === 'access_granted') { %>
+                    <span class="badge badge-success"><i class="fas fa-lock-open"></i> Ruhusiwa</span>
+                  <% } else if (l.action === 'access_denied') { %>
+                    <span class="badge badge-danger"><i class="fas fa-ban"></i> Katiwa</span>
+                  <% } else if (l.action === 'manual_open') { %>
+                    <span class="badge badge-info"><i class="fas fa-key"></i> Admin Akafungua</span>
+                  <% } else { %>
+                    <span class="badge badge-secondary"><i class="fas fa-lock"></i> Admin Akafunga</span>
+                  <% } %>
+                </td>
+                <td><small><%= l.reason || '-' %></small></td>
+              </tr>
+              <% }) %>
+              <% if (logs.length === 0) { %>
+              <tr><td colspan="8" class="text-center text-muted">Hakuna rekodi bado</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/app.js"></script>
+</body>
+</html>

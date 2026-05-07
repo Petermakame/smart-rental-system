@@ -1,0 +1,62 @@
+<%- include('../partials/head', { title: 'Manage Tenants' }) %>
+<%- include('../partials/admin-nav') %>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>👥 Tenant Management</h2>
+    <button onclick="showAddTenant()" class="btn-primary">➕ Add Tenant</button>
+  </div>
+  
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Room</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>RFID</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% tenants.forEach(tenant => { %>
+          <tr>
+            <td><%= tenant.room_no %></td>
+            <td><%= tenant.name %></td>
+            <td><%= tenant.email %></td>
+            <td><%= tenant.phone || '-' %></td>
+            <td><code><%= tenant.rfid_code || 'Not set' %></code></td>
+            <td>
+              <span class="badge <%= tenant.is_active ? 'badge-success' : 'badge-error' %>">
+                <%= tenant.is_active ? 'Active' : 'Blocked' %>
+              </span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-sm btn-success" onclick="toggleStatus(<%= tenant.id %>, <%= tenant.is_active %>)">Toggle</button>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function toggleStatus(id, currentStatus) {
+  const newStatus = !currentStatus;
+  try {
+    const res = await fetch(`/api/tenants/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_active: newStatus })
+    });
+    if (res.ok) location.reload();
+  } catch(err) { console.error(err); }
+}
+</script>
+<script src="/js/admin.js"></script>
+</body></html>

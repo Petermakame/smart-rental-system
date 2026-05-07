@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <div class="tenant-layout">
+    <!-- Tenant Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-building"></i>
+        <span>Smart Rental</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/tenant/dashboard" class="nav-item active"><i class="fas fa-home"></i> Dashibodi</a>
+        <a href="/logout" class="nav-item"><i class="fas fa-sign-out-alt"></i> Toka</a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <h2>Habari, <%= user.name %>! 👋</h2>
+        <span class="badge badge-info">Mpangaji</span>
+      </header>
+
+      <div class="content-area">
+        <% if (tenant) { %>
+
+        <!-- Door Status Card (Big, Prominent) -->
+        <div class="door-status-card <%= currentPayment ? 'door-open' : 'door-locked' %>">
+          <div class="door-icon">
+            <i class="fas fa-<%= currentPayment ? 'lock-open' : 'lock' %>"></i>
+          </div>
+          <div class="door-info">
+            <h2><%= currentPayment ? '🟢 Mlango Wako Umefunguliwa' : '🔴 Mlango Wako Umefungwa' %></h2>
+            <p>
+              <% if (currentPayment) { %>
+                Malipo ya mwezi huu (<%=currentMonth%>) yamekamilika. Karibu nyumbani!
+              <% } else { %>
+                Malipo ya mwezi huu (<%=currentMonth%>) hayajafanywa. Lipa ili ufungue mlango.
+              <% } %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Tenant Info Cards -->
+        <div class="stats-grid mt-4">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+            <div class="stat-info"><h3>Chumba <%= tenant.roomNo %></h3><p>Namba ya Chumba</p></div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-money-bill"></i></div>
+            <div class="stat-info"><h3>TZS <%= tenant.rentAmount?.toLocaleString() %></h3><p>Kodi ya Kila Mwezi</p></div>
+          </div>
+          <div class="stat-card <%= tenant.rfidTag ? 'stat-green' : 'stat-red' %>">
+            <div class="stat-icon"><i class="fas fa-id-card"></i></div>
+            <div class="stat-info">
+              <h3><%= tenant.rfidTag || 'Haijasajiliwa' %></h3>
+              <p>RFID Tag</p>
+            </div>
+          </div>
+          <div class="stat-card stat-yellow">
+            <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+            <div class="stat-info">
+              <h3><%= new Date(tenant.moveInDate).toLocaleDateString('sw-TZ') %></h3>
+              <p>Tarehe ya Kuingia</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card mt-4">
+          <div class="card-header">
+            <h3><i class="fas fa-history"></i> Historia ya Malipo</h3>
+          </div>
+          <div class="card-body">
+            <table class="table">
+              <thead>
+                <tr><th>Mwezi</th><th>Kiasi</th><th>Njia</th><th>Hali</th><th>Tarehe Lililipwa</th></tr>
+              </thead>
+              <tbody>
+                <% payments.forEach(p => { %>
+                <tr>
+                  <td><%= p.month %></td>
+                  <td>TZS <%= p.amount?.toLocaleString() %></td>
+                  <td><span class="badge badge-info"><%= p.paymentMethod %></span></td>
+                  <td>
+                    <span class="badge badge-<%= p.status === 'paid' ? 'success' : 'danger' %>">
+                      <%= p.status === 'paid' ? '✅ Imelipwa' : '❌ Haijalipiwa' %>
+                    </span>
+                  </td>
+                  <td><%= p.paidAt ? new Date(p.paidAt).toLocaleDateString('sw-TZ') : '-' %></td>
+                </tr>
+                <% }) %>
+                <% if (payments.length === 0) { %>
+                <tr><td colspan="5" class="text-center text-muted">Hakuna historia ya malipo bado</td></tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <% } else { %>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          Wasiliana na admin. Taarifa yako hazijaingizwa bado.
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <script src="/js/app.js"></script>
+</body>
+</html>

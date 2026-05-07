@@ -1,0 +1,38 @@
+<%- include('../partials/head', { title: 'Access Logs' }) %>
+<%- include('../partials/admin-nav') %>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>📋 Door Access Logs</h2>
+  </div>
+  
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Room</th>
+          <th>Tenant</th>
+          <th>Decision</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% logs.forEach(log => { %>
+          <tr>
+            <td><%= new Date(log.created_at).toLocaleString() %></td>
+            <td><%= log.room_no || '-' %></td>
+            <td><%= log.tenant_name || 'Unknown' %></td>
+            <td>
+              <span class="badge <%= log.decision === 'ALLOW' ? 'badge-success' : 'badge-error' %>">
+                <%= log.decision %>
+              </span>
+            </td>
+            <td><%= log.reason || '-' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body></html>

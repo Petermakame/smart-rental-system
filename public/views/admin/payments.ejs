@@ -1,0 +1,60 @@
+<%- include('../partials/head', { title: 'Payments' }) %>
+<%- include('../partials/admin-nav') %>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>💰 Payment Records</h2>
+    <button onclick="showAddPayment()" class="btn-primary">➕ Record Payment</button>
+  </div>
+  
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Room</th>
+          <th>Tenant</th>
+          <th>Amount (TZS)</th>
+          <th>Method</th>
+          <th>Reference</th>
+          <th>Status</th>
+          <th>Expiry Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% payments.forEach(p => { %>
+          <tr>
+            <td><%= new Date(p.created_at).toLocaleDateString() %></td>
+            <td><%= p.room_no %></td>
+            <td><%= p.tenant_name %></td>
+            <td><%= parseInt(p.amount).toLocaleString() %></td>
+            <td><%= p.payment_method %></td>
+            <td><%= p.reference || '-' %></td>
+            <td>
+              <select class="status-select" onchange="updateStatus(<%= p.id %>, this.value)">
+                <option value="paid" <%= p.status === 'paid' ? 'selected' : '' %>>Paid</option>
+                <option value="unpaid" <%= p.status === 'unpaid' ? 'selected' : '' %>>Unpaid</option>
+                <option value="pending" <%= p.status === 'pending' ? 'selected' : '' %>>Pending</option>
+              </select>
+            </td>
+            <td><%= p.expiry_date ? new Date(p.expiry_date).toLocaleDateString() : '-' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+async function updateStatus(id, status) {
+  try {
+    await fetch(`/api/payments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+  } catch(err) { console.error(err); }
+}
+</script>
+<script src="/js/admin.js"></script>
+</body></html>

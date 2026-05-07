@@ -1,0 +1,61 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║           SMART RENTAL SYSTEM - ESP32 WIRING DIAGRAM                   ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        ESP32 DevKit V1                                  │
+│                                                                         │
+│  RFID RC522 (SPI)           │  FINGERPRINT R307/AS608 (UART2)          │
+│  ─────────────────          │  ──────────────────────────────          │
+│  RC522 SDA  → Pin 5 (SS)   │  FP TX  → ESP32 Pin 16 (RX2)            │
+│  RC522 SCK  → Pin 18 (SCK) │  FP RX  → ESP32 Pin 17 (TX2)            │
+│  RC522 MOSI → Pin 23       │  FP VCC → 3.3V                           │
+│  RC522 MISO → Pin 19       │  FP GND → GND                            │
+│  RC522 RST  → Pin 22       │                                           │
+│  RC522 GND  → GND          │  RELAY MODULE                             │
+│  RC522 3.3V → 3.3V         │  ──────────────────                       │
+│                             │  Relay IN  → Pin 26                      │
+│  OUTPUTS                    │  Relay VCC → 5V (Vin)                   │
+│  ──────────────             │  Relay GND → GND                         │
+│  Green LED  → Pin 27        │                                           │
+│  Red LED    → Pin 25        │  SOLENOID LOCK (12V)                     │
+│  Buzzer     → Pin 32        │  ──────────────────────                  │
+│  (all with 220Ω resistor)  │  Lock + → Relay COM/NO                   │
+│                             │  Lock - → 12V PSU GND                   │
+│                             │  12V PSU → Power Adapter                 │
+└─────────────────────────────────────────────────────────────────────────┘
+
+RELAY WIRING DETAIL:
+────────────────────
+  12V PSU (+) ──────────────── Solenoid Lock (+)
+  12V PSU (-) ──────────────── Relay GND
+  
+  Relay COM ─────────────────── 12V PSU (-)  [Common]
+  Relay NO  ─────────────────── Solenoid Lock (-)  [Normally Open]
+  
+  ┌──────────────────────────────────────────────────────────┐
+  │  When Relay fires (ESP32 sends LOW to Pin 26):           │
+  │    NO → COM connects → Current flows → Lock OPENS        │
+  │  When Relay off (ESP32 sends HIGH or no signal):         │
+  │    NO → COM breaks → No current → Lock CLOSES (locked)  │
+  └──────────────────────────────────────────────────────────┘
+
+FULL POWER DIAGRAM:
+───────────────────
+  [USB 5V] → ESP32 (powers ESP32 + RFID + Fingerprint)
+  [12V Adapter] → Solenoid Lock (via Relay)
+  [5V from ESP32 Vin] → Relay Module VCC
+
+LIBRARIES TO INSTALL (Arduino IDE):
+─────────────────────────────────────
+  1. MFRC522               → by GithubCommunity
+  2. Adafruit Fingerprint  → by Adafruit
+  3. ArduinoJson           → by Benoit Blanchon
+  4. ESP32 Board Package   → https://dl.espressif.com/dl/package_esp32_index.json
+
+ARDUINO IDE SETTINGS:
+──────────────────────
+  Board: ESP32 Dev Module
+  Port: COMxx (Windows) or /dev/ttyUSB0 (Linux)
+  Upload Speed: 115200
+  Partition Scheme: Default 4MB with spiffs

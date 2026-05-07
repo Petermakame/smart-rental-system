@@ -1,0 +1,26 @@
+<%- include('../partials/head', { title: 'Login - Smart Rental' }) %>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">🏠</div>
+    <h1>Smart Rental System</h1>
+    <p class="auth-sub">Sign in to your account</p>
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-primary btn-full">Sign In</button>
+    </form>
+    <div class="auth-footer">
+      <p>Demo: <strong>admin@smartrental.com</strong> / <strong>Admin@123</strong></p>
+    </div>
+  </div>
+</div>
+</body></html>

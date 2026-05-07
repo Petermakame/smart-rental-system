@@ -1,0 +1,115 @@
+<%- include('../partials/head', { title: 'Admin Dashboard' }) %>
+<%- include('../partials/admin-nav') %>
+
+<div class="page-container">
+  <div class="page-header">
+    <h2>📊 Dashboard Overview</h2>
+    <span class="badge badge-admin">Admin</span>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value"><%= stats.tenants %></div>
+      <div class="stat-label">Total Tenants</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-value"><%= stats.paid %></div>
+      <div class="stat-label">Paid Payments</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🚪</div>
+      <div class="stat-value"><%= stats.logs %></div>
+      <div class="stat-label">Door Events (24h)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📡</div>
+      <div class="stat-value"><%= stats.devices %></div>
+      <div class="stat-label">Online Devices</div>
+    </div>
+  </div>
+
+  <div class="dashboard-actions">
+    <h3>Quick Actions</h3>
+    <div class="action-grid">
+      <button onclick="showAddTenant()" class="action-card">
+        <span>➕</span> Add New Tenant
+      </button>
+      <button onclick="showAddPayment()" class="action-card">
+        <span>💰</span> Record Payment
+      </button>
+      <a href="/admin/access-logs" class="action-card">
+        <span>🔍</span> View Access Logs
+      </a>
+      <a href="/admin/tenants" class="action-card">
+        <span>👥</span> Manage Tenants
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Add Tenant Modal -->
+<div id="addTenantModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add New Tenant</h3>
+      <button onclick="closeModal('addTenantModal')">✕</button>
+    </div>
+    <form id="addTenantForm">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name *</label><input name="name" required placeholder="John Doe"></div>
+        <div class="form-group"><label>Email *</label><input type="email" name="email" required placeholder="tenant@email.com"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Password *</label><input type="password" name="password" required placeholder="Min 6 chars" minlength="6"></div>
+        <div class="form-group"><label>Room No *</label><input name="room_no" required placeholder="Room 101"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone</label><input name="phone" placeholder="+255..."></div>
+        <div class="form-group"><label>RFID Code</label><input name="rfid_code" placeholder="RFID Tag ID"></div>
+      </div>
+      <div class="form-group"><label>Fingerprint ID</label><input name="fingerprint_id" placeholder="Fingerprint slot number"></div>
+      <div id="tenantMsg" class="alert hidden"></div>
+      <button type="submit" class="btn-primary btn-full">Create Tenant</button>
+    </form>
+  </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div id="addPaymentModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Record Payment</h3>
+      <button onclick="closeModal('addPaymentModal')">✕</button>
+    </div>
+    <form id="addPaymentForm">
+      <div class="form-group">
+        <label>Tenant</label>
+        <select name="tenant_id" id="tenantSelect" required><option value="">Loading...</option></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Amount (TZS)</label><input type="number" name="amount" required placeholder="50000"></div>
+        <div class="form-group"><label>Months</label><input type="number" name="months" value="1" min="1" max="12"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select name="payment_method">
+            <option value="cash">Cash</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="tigopesa">Tigo Pesa</option>
+            <option value="airtel">Airtel Money</option>
+            <option value="bank">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Reference</label><input name="reference" placeholder="Transaction ref"></div>
+      </div>
+      <div id="paymentMsg" class="alert hidden"></div>
+      <button type="submit" class="btn-primary btn-full">Record Payment</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body></html>

@@ -1,0 +1,33 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <i class="fas fa-building"></i>
+    <span>Smart Rental</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard" class="nav-item <%= activePage === 'dashboard' ? 'active' : '' %>">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/admin/tenants" class="nav-item <%= activePage === 'tenants' ? 'active' : '' %>">
+      <i class="fas fa-users"></i> Wapangaji
+    </a>
+    <a href="/admin/payments" class="nav-item <%= activePage === 'payments' ? 'active' : '' %>">
+      <i class="fas fa-money-bill-wave"></i> Malipo
+    </a>
+    <a href="/admin/access-logs" class="nav-item <%= activePage === 'logs' ? 'active' : '' %>">
+      <i class="fas fa-history"></i> Historia ya Mlango
+    </a>
+    <div class="nav-divider"></div>
+    <a href="/logout" class="nav-item nav-logout">
+      <i class="fas fa-sign-out-alt"></i> Toka
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+      <div>
+        <strong><%= user.name %></strong>
+        <small>Admin</small>
+      </div>
+    </div>
+  </div>
+</aside>

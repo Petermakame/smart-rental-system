@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <%- include('../partials/sidebar', { user, activePage: 'tenants' }) %>
+  <div class="main-content">
+    <%- include('../partials/topbar', { user, title: 'Wapangaji' }) %>
+
+    <div class="content-area">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-users"></i> Orodha ya Wapangaji</h3>
+          <button class="btn btn-primary" onclick="openModal('addTenantModal')">
+            <i class="fas fa-plus"></i> Ongeza Mpangaji
+          </button>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Jina</th><th>Chumba</th><th>Simu</th><th>RFID</th><th>Kodi</th><th>Hali</th><th>Mlango</th><th>Hatua</th></tr>
+            </thead>
+            <tbody>
+              <% tenants.forEach((t, i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><strong><%= t.name %></strong><br><small class="text-muted"><%= t.userId?.email %></small></td>
+                <td><span class="badge badge-info">Chumba <%= t.roomNo %></span></td>
+                <td><%= t.phone || '-' %></td>
+                <td><%= t.rfidTag ? `<span class="badge badge-success">${t.rfidTag}</span>` : '<span class="badge badge-secondary">Haijasajiliwa</span>' %></td>
+                <td>TZS <%= t.rentAmount?.toLocaleString() %></td>
+                <td>
+                  <span class="badge badge-<%= t.status === 'active' ? 'success' : 'danger' %>">
+                    <%= t.status === 'active' ? 'Amilifu' : 'Amezuiwa' %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge-<%= t.doorAccess ? 'success' : 'danger' %>">
+                    <i class="fas fa-<%= t.doorAccess ? 'lock-open' : 'lock' %>"></i>
+                    <%= t.doorAccess ? 'Wazi' : 'Imefungwa' %>
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline" onclick="editTenant('<%= t._id %>', '<%= t.name %>', '<%= t.roomNo %>', '<%= t.phone %>', '<%= t.rentAmount %>', '<%= t.rfidTag || '' %>', '<%= t.fingerprintId || '' %>')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteTenant('<%= t._id %>', '<%= t.name %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <% }) %>
+              <% if (tenants.length === 0) { %>
+              <tr><td colspan="9" class="text-center text-muted">Hakuna wapangaji bado. Ongeza mpangaji wa kwanza!</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Tenant Modal -->
+  <div id="addTenantModal" class="modal" style="display:none">
+    <div class="modal-overlay" onclick="closeModal('addTenantModal')"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Ongeza Mpangaji Mpya</h3>
+        <button onclick="closeModal('addTenantModal')" class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="addTenantForm">
+        <div class="form-grid">
+          <div class="form-group"><label>Jina Kamili *</label><input type="text" id="t_name" required /></div>
+          <div class="form-group"><label>Barua Pepe *</label><input type="email" id="t_email" required /></div>
+          <div class="form-group"><label>Simu</label><input type="tel" id="t_phone" placeholder="+255 7XX XXX XXX"/></div>
+          <div class="form-group"><label>Nywila ya Mwanzo</label><input type="text" id="t_password" placeholder="Default: Tenant@2024"/></div>
+          <div class="form-group"><label>Namba ya Chumba *</label><input type="text" id="t_room" placeholder="mf: A1, 101" required /></div>
+          <div class="form-group"><label>Kodi ya Kila Mwezi (TZS) *</label><input type="number" id="t_rent" placeholder="150000" required /></div>
+          <div class="form-group"><label>RFID Tag</label><input type="text" id="t_rfid" placeholder="Scan au andika"/></div>
+          <div class="form-group"><label>Fingerprint ID</label><input type="number" id="t_finger" placeholder="1-127"/></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('addTenantModal')">Ghairi</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Hifadhi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Tenant Modal -->
+  <div id="editTenantModal" class="modal" style="display:none">
+    <div class="modal-overlay" onclick="closeModal('editTenantModal')"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit"></i> Hariri Mpangaji</h3>
+        <button onclick="closeModal('editTenantModal')" class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="editTenantForm">
+        <input type="hidden" id="edit_id" />
+        <div class="form-grid">
+          <div class="form-group"><label>Jina Kamili</label><input type="text" id="edit_name" /></div>
+          <div class="form-group"><label>Namba ya Chumba</label><input type="text" id="edit_room" /></div>
+          <div class="form-group"><label>Simu</label><input type="tel" id="edit_phone" /></div>
+          <div class="form-group"><label>Kodi (TZS)</label><input type="number" id="edit_rent" /></div>
+          <div class="form-group"><label>RFID Tag</label><input type="text" id="edit_rfid" /></div>
+          <div class="form-group"><label>Fingerprint ID</label><input type="number" id="edit_finger" /></div>
+          <div class="form-group">
+            <label>Hali</label>
+            <select id="edit_status">
+              <option value="active">Amilifu</option>
+              <option value="blocked">Amezuiwa</option>
+              <option value="inactive">Amekwisha</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('editTenantModal')">Ghairi</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Hifadhi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+
+    document.getElementById('addTenantForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/tenants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          name: document.getElementById('t_name').value,
+          email: document.getElementById('t_email').value,
+          phone: document.getElementById('t_phone').value,
+          password: document.getElementById('t_password').value || 'Tenant@2024',
+          roomNo: document.getElementById('t_room').value,
+          rentAmount: document.getElementById('t_rent').value,
+          rfidTag: document.getElementById('t_rfid').value,
+          fingerprintId: document.getElementById('t_finger').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) { alert(`✅ ${data.message}\nNywila ya kwanza: ${data.defaultPassword}`); location.reload(); }
+      else alert(`❌ ${data.message}`);
+    });
+
+    document.getElementById('editTenantForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit_id').value;
+      const res = await fetch(`/api/tenants/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          name: document.getElementById('edit_name').value,
+          roomNo: document.getElementById('edit_room').value,
+          phone: document.getElementById('edit_phone').value,
+          rentAmount: document.getElementById('edit_rent').value,
+          rfidTag: document.getElementById('edit_rfid').value,
+          fingerprintId: document.getElementById('edit_finger').value,
+          status: document.getElementById('edit_status').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) { alert('✅ Mpangaji amesasishwa!'); location.reload(); }
+      else alert(`❌ ${data.message}`);
+    });
+
+    function editTenant(id, name, room, phone, rent, rfid, finger) {
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_name').value = name;
+      document.getElementById('edit_room').value = room;
+      document.getElementById('edit_phone').value = phone;
+      document.getElementById('edit_rent').value = rent;
+      document.getElementById('edit_rfid').value = rfid;
+      document.getElementById('edit_finger').value = finger;
+      openModal('editTenantModal');
+    }
+
+    async function deleteTenant(id, name) {
+      if (!confirm(`Kufuta ${name}? Hatua hii haiwezi kurudishwa!`)) return;
+      const res = await fetch(`/api/tenants/${id}`, {
+        method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) { alert('✅ Mpangaji amefutwa'); location.reload(); }
+      else alert(`❌ ${data.message}`);
+    }
+  </script>
+</body>
+</html>

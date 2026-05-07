@@ -1,0 +1,48 @@
+<%- include('../partials/head', { title: 'Register - Smart Rental' }) %>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">🏠</div>
+    <h1>Create Account</h1>
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+    <form id="registerForm">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" placeholder="John Doe" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Min 6 characters" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select name="role">
+          <option value="tenant">Tenant</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary btn-full">Register</button>
+    </form>
+    <div class="auth-footer">
+      <a href="/login">Already have an account? Sign in</a>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const res = await fetch('/api/auth/register', {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  });
+  const json = await res.json();
+  if (res.ok) window.location = '/login';
+  else alert(json.error);
+});
+</script>
+</body></html>

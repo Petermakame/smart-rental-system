@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="auth-body">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <i class="fas fa-building"></i>
+        <h1>Smart Rental</h1>
+        <p>Unda Akaunti Mpya</p>
+      </div>
+
+      <div id="alertBox" class="alert" style="display:none"></div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Jina Kamili</label>
+          <input type="text" id="name" placeholder="Jina lako kamili" required />
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Barua Pepe</label>
+          <input type="email" id="email" placeholder="mfano@email.com" required />
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Simu</label>
+          <input type="tel" id="phone" placeholder="+255 7XX XXX XXX" />
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-lock"></i> Nywila</label>
+          <div class="password-wrap">
+            <input type="password" id="password" placeholder="Angalau herufi 6" required />
+            <span onclick="togglePassword('password')" class="toggle-pw"><i class="fas fa-eye"></i></span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="regBtn">
+          <i class="fas fa-user-plus"></i> Sajili
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Una akaunti? <a href="/login">Ingia hapa</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('regBtn');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inasajili...';
+      btn.disabled = true;
+
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          password: document.getElementById('password').value
+        })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('token', data.token);
+        showAlert('success', data.message + ' - Unaelekezwa...');
+        setTimeout(() => window.location.href = data.redirect || '/tenant/dashboard', 1500);
+      } else {
+        showAlert('error', data.message);
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Sajili';
+        btn.disabled = false;
+      }
+    });
+
+    function showAlert(type, msg) {
+      const box = document.getElementById('alertBox');
+      box.className = `alert alert-${type}`;
+      box.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+      box.style.display = 'block';
+    }
+
+    function togglePassword(id) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+</body>
+</html>

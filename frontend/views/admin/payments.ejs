@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <%- include('../partials/sidebar', { user, activePage: 'payments' }) %>
+  <div class="main-content">
+    <%- include('../partials/topbar', { user, title: 'Malipo' }) %>
+
+    <div class="content-area">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-money-bill-wave"></i> Rekodi za Malipo</h3>
+          <button class="btn btn-primary" onclick="openModal('addPaymentModal')">
+            <i class="fas fa-plus"></i> Rekodi Malipo
+          </button>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr><th>#</th><th>Mpangaji</th><th>Chumba</th><th>Mwezi</th><th>Kiasi</th><th>Njia</th><th>Hali</th><th>Tarehe</th></tr>
+            </thead>
+            <tbody>
+              <% payments.forEach((p, i) => { %>
+              <tr>
+                <td><%= i+1 %></td>
+                <td><strong><%= p.tenantId?.name || 'N/A' %></strong></td>
+                <td><%= p.tenantId?.roomNo || '-' %></td>
+                <td><%= p.month %></td>
+                <td>TZS <%= p.amount?.toLocaleString() %></td>
+                <td>
+                  <span class="badge badge-info text-upper"><%= p.paymentMethod %></span>
+                </td>
+                <td>
+                  <span class="badge badge-<%= p.status === 'paid' ? 'success' : p.status === 'overdue' ? 'danger' : 'warning' %>">
+                    <%= p.status === 'paid' ? '✅ Imelipwa' : p.status === 'overdue' ? '⚠️ Muda umepita' : '❌ Haijalipiwa' %>
+                  </span>
+                </td>
+                <td><%= p.paidAt ? new Date(p.paidAt).toLocaleDateString('sw-TZ') : '-' %></td>
+              </tr>
+              <% }) %>
+              <% if (payments.length === 0) { %>
+              <tr><td colspan="8" class="text-center text-muted">Hakuna malipo bado</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Payment Modal -->
+  <div id="addPaymentModal" class="modal" style="display:none">
+    <div class="modal-overlay" onclick="closeModal('addPaymentModal')"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-money-check-alt"></i> Rekodi Malipo</h3>
+        <button onclick="closeModal('addPaymentModal')" class="modal-close"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="addPaymentForm">
+        <div class="form-group">
+          <label>Mpangaji *</label>
+          <select id="p_tenant" required>
+            <option value="">-- Chagua Mpangaji --</option>
+            <% tenants.forEach(t => { %>
+            <option value="<%= t._id %>"><%= t.name %> - Chumba <%= t.roomNo %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mwezi wa Malipo *</label>
+          <input type="month" id="p_month" required />
+        </div>
+        <div class="form-group">
+          <label>Kiasi (TZS) *</label>
+          <input type="number" id="p_amount" placeholder="150000" required />
+        </div>
+        <div class="form-group">
+          <label>Njia ya Malipo</label>
+          <select id="p_method">
+            <option value="manual">Mkono (Cash)</option>
+            <option value="mpesa">M-Pesa</option>
+            <option value="tigopesa">Tigo Pesa</option>
+            <option value="airtel">Airtel Money</option>
+            <option value="bank">Benki</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Namba ya Muamala (optional)</label>
+          <input type="text" id="p_txn" placeholder="Kwa M-Pesa/Tigo etc." />
+        </div>
+        <div class="form-group">
+          <label>Maelezo</label>
+          <textarea id="p_notes" placeholder="Maelezo yoyote..."></textarea>
+        </div>
+        <div class="alert alert-info" style="margin-top:10px">
+          <i class="fas fa-info-circle"></i>
+          <strong>Kumbuka:</strong> Baada ya kurekodi malipo, mlango wa mpangaji utafunguliwa moja kwa moja!
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('addPaymentModal')">Ghairi</button>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Hifadhi & Fungua Mlango</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+
+    // Set current month as default
+    document.getElementById('p_month').value = new Date().toISOString().slice(0, 7);
+
+    document.getElementById('addPaymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inahifadhi...';
+      btn.disabled = true;
+
+      const res = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          tenantId: document.getElementById('p_tenant').value,
+          month: document.getElementById('p_month').value,
+          amount: document.getElementById('p_amount').value,
+          paymentMethod: document.getElementById('p_method').value,
+          transactionId: document.getElementById('p_txn').value,
+          notes: document.getElementById('p_notes').value
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(`✅ ${data.message}`);
+        location.reload();
+      } else {
+        alert(`❌ ${data.message}`);
+        btn.innerHTML = '<i class="fas fa-save"></i> Hifadhi & Fungua Mlango';
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
